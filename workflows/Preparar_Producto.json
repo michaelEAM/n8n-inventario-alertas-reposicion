@@ -1,0 +1,207 @@
+{
+  "name": "Preparar producto",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "id",
+              "type": "any"
+            },
+            {
+              "name": "producto",
+              "type": "any"
+            },
+            {
+              "name": "stock",
+              "type": "any"
+            },
+            {
+              "name": "stock_minimo",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ],
+      "id": "52afa85a-1b36-4180-884e-b81c316de192",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e2302240-2233-411c-b121-b18fe34cc6fd",
+              "leftValue": "={{ String($json.producto ?? '').trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "91b6eb06-f6f9-47d9-b0f6-580c18c5b87e",
+              "leftValue": "={{ !($json.stock === null || $json.stock === undefined || $json.stock === '' || isNaN(Number($json.stock)) || Number($json.stock) < 0) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8b2c014e-3912-4fb6-b532-d43b37394e3a",
+              "leftValue": "={{ !($json.stock_minimo === null || $json.stock_minimo === undefined || $json.stock_minimo === '' || isNaN(Number($json.stock_minimo)) || Number($json.stock_minimo) < 0) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        220,
+        200
+      ],
+      "id": "7a0bc66e-a8e7-4eb2-915c-f21d5e34ee0d",
+      "name": "¿Datos válidos?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88a8dc7d-2622-4f0c-a908-c574e570e7ce",
+              "name": "producto",
+              "value": "={{ String($json.producto).trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "bccc29da-3483-45b0-bc74-6233a14aa985",
+              "name": "stock",
+              "value": "={{ Number($json.stock) }}",
+              "type": "number"
+            },
+            {
+              "id": "1e411dc1-85a3-46f7-ae7c-a10e19ee65ef",
+              "name": "stock_minimo",
+              "value": "={{ Number($json.stock_minimo) }}",
+              "type": "number"
+            },
+            {
+              "id": "538aa64d-8c7a-435c-a3e4-5b858e726649",
+              "name": "datos_validos",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "1a5a868b-fd4f-4acd-904e-b39de134394e",
+              "name": "motivo",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        460,
+        100
+      ],
+      "id": "1a521617-0478-449c-945d-6907e5d2466d",
+      "name": "Normalizar datos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2849e7ba-07dd-46a7-989a-f6ab8a533668",
+              "name": "datos_validos",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "b04f51bb-36e9-4493-b52d-e71e6ad096f5",
+              "name": "motivo",
+              "value": "={{ [ !String($json.producto ?? '').trim() && 'producto vacío', ($json.stock === null || $json.stock === undefined || $json.stock === '' || isNaN(Number($json.stock)) || Number($json.stock) < 0) && 'stock no válido', ($json.stock_minimo === null || $json.stock_minimo === undefined || $json.stock_minimo === '' || isNaN(Number($json.stock_minimo)) || Number($json.stock_minimo) < 0) && 'stock_minimo no válido' ].filter(Boolean).join('; ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        460,
+        320
+      ],
+      "id": "526467ec-83e0-4673-a8c0-a311319f145b",
+      "name": "Marcar datos no válidos"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "¿Datos válidos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Datos válidos?": {
+      "main": [
+        [
+          {
+            "node": "Normalizar datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar datos no válidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

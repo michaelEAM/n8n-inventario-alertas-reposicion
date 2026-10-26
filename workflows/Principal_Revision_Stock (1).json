@@ -1,0 +1,908 @@
+{
+  "name": "Principal - Revisión de stock",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2cf4cc75-2b2e-489f-ad31-6f4426febd59",
+              "leftValue": "={{ $json.stock }}",
+              "rightValue": "={{ $json.stock_minimo }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "133117c7-947b-4ba2-a4f6-de85ff16e1ee",
+              "leftValue": "={{ $json.stock }}",
+              "rightValue": "={{ $json.stock_minimo }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        120,
+        272
+      ],
+      "id": "ce97f6ce-bbbe-4d0e-85a0-2d3a717e77ef",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.prioridad }}",
+                    "rightValue": "Alta",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "33f2c226-219b-49b9-b727-edcf3d4914e4"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e6b5e8c3-8f90-4941-b220-329011b30b3f",
+                    "leftValue": "={{ $json.prioridad }}",
+                    "rightValue": "Mediana",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        96
+      ],
+      "id": "affae8e0-d9af-416a-b6fc-5f49628e008c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30d09b17-c9e9-468e-941e-fe865d109b3d",
+              "name": "=faltante",
+              "value": "={{ Math.max(0, $json.stock_minimo - $json.stock) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -280,
+        272
+      ],
+      "id": "c3817c74-7f45-4e06-8784-ac296822205d",
+      "name": "Transformar y calcular"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9752661f-7c4f-40a0-bb24-089c6574f666",
+              "name": "=prioridad",
+              "value": "={{ $json.stock < $json.stock_minimo ? 'Alta' : $json.stock == $json.stock_minimo ? 'Mediana' : 'Baja' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -80,
+        272
+      ],
+      "id": "e8306d1c-02aa-4c10-812c-749857fe4049",
+      "name": "Asignar prioridad"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a064f67-a3ef-40b8-a772-4827635149f3",
+              "name": "Estado",
+              "value": "Stock crítico",
+              "type": "string"
+            },
+            {
+              "id": "69648402-9069-4c04-9ff5-279354fa9560",
+              "name": "Accion",
+              "value": "Reponer inmediatamente",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "623ea955-1863-4299-beed-d0ba9235b501",
+      "name": "Prioridad alta"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fabd2d85-6af3-43f9-9a13-2afd20e69d14",
+              "name": "Estado",
+              "value": "Stock bajo",
+              "type": "string"
+            },
+            {
+              "id": "00eeb2df-e4b3-4ae9-aea0-9412d8dc3037",
+              "name": "Accion",
+              "value": "Reponer pronto",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        560,
+        176
+      ],
+      "id": "adcf4a74-b804-45c3-91c3-2d5e3db4f783",
+      "name": "Prioridad media"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21897e87-1a87-48cb-947a-fb896bf84b15",
+              "name": "Estado",
+              "value": "Stock suficiente",
+              "type": "string"
+            },
+            {
+              "id": "d0151a6c-774e-48fd-a8e1-b2cee1a3a639",
+              "name": "Accion",
+              "value": "No requiere reposición",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        400,
+        368
+      ],
+      "id": "b541b5e6-4921-4e85-b954-fd3b3bc594ab",
+      "name": "No requiere reposición"
+    },
+    {
+      "parameters": {
+        "url": "https://TU-PROYECTO.supabase.co/rest/v1/stock_productos",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "producto",
+              "value": "=ilike.*{{ $json.query?.producto || '' }}*"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -992,
+        256
+      ],
+      "id": "15c2d9a2-6bca-4985-8331-a398e67db9fe",
+      "name": "HTTP Request",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "cJhpFzlFaDakVsaY",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        272
+      ],
+      "id": "38ca0563-709e-46f6-91ca-c88aa11129ec",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "httpMethod": "=GET",
+        "path": "revisar-stock",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        448
+      ],
+      "id": "30283a32-4673-40ad-b189-55591d3a7ba1",
+      "name": "Webhook",
+      "webhookId": "9bb0780a-8eac-4bb5-9bc2-e00c09d58b63"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1160,
+        256
+      ],
+      "id": "d8ce24bb-749c-400e-9b79-f983751e8eb5",
+      "name": "Unir resultados"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1360,
+        256
+      ],
+      "id": "96910b5b-01ce-4a93-8084-07f8645bc469",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "350e9f51-6252-4f09-ae41-bd3de6c3a2bb",
+              "leftValue": "={{ $json.id !== undefined }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -880,
+        448
+      ],
+      "id": "4ec21e17-924b-405a-bccc-06367a49e682",
+      "name": "¿Encontró producto?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9c4ac1dc-9dc6-41e8-9366-705ee2d90055",
+              "name": "Estado",
+              "value": "Producto no encontrado",
+              "type": "string"
+            },
+            {
+              "id": "e0ef97b1-b08b-401f-b01e-fb7a03ba3e2e",
+              "name": "Accion",
+              "value": "Revise el nombre del producto",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -680,
+        640
+      ],
+      "id": "e6cb5376-decb-4d35-b5cb-a914777b1da2",
+      "name": "Producto no encontrado"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Preparar producto"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "producto": "={{ $json.producto }}",
+            "stock": "={{ $json.stock }}",
+            "stock_minimo": "={{ $json.stock_minimo }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "any",
+              "removed": false
+            },
+            {
+              "id": "producto",
+              "displayName": "producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "any",
+              "removed": false
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "any",
+              "removed": false
+            },
+            {
+              "id": "stock_minimo",
+              "displayName": "stock_minimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "any",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -680,
+        448
+      ],
+      "id": "48fe3e17-12b9-49f5-9127-c5b5e36acb26",
+      "name": "Preparar producto (subworkflow)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2757c1ef-50a4-42e7-b717-0d06a8dd6c25",
+              "leftValue": "={{ $json.datos_validos }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        448
+      ],
+      "id": "5751a8ee-259d-4388-861b-44db10bcac13",
+      "name": "¿Datos válidos?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a1cf945-c06e-4302-9831-a5049a94824b",
+              "name": "Estado",
+              "value": "Datos de stock no válidos",
+              "type": "string"
+            },
+            {
+              "id": "e3875995-c5d1-486c-9272-c1604020b6a8",
+              "name": "Accion",
+              "value": "Corregir el registro en inventario",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -280,
+        640
+      ],
+      "id": "d863c01f-0f49-4fcb-ac28-a223d0d2a2d8",
+      "name": "Datos no válidos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://TU-PROYECTO.supabase.co/rest/v1/alertas_reposicion",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "on_conflict",
+              "value": "alerta_id"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "alerta_id",
+              "value": "={{ $json.id }}-{{ $now.toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "producto",
+              "value": "={{ $json.producto }}"
+            },
+            {
+              "name": "stock",
+              "value": "={{ $json.stock }}"
+            },
+            {
+              "name": "stock_minimo",
+              "value": "={{ $json.stock_minimo }}"
+            },
+            {
+              "name": "faltante",
+              "value": "={{ $json.faltante }}"
+            },
+            {
+              "name": "prioridad",
+              "value": "={{ $json.prioridad }}"
+            },
+            {
+              "name": "estado_stock",
+              "value": "={{ $json.Estado }}"
+            },
+            {
+              "name": "accion",
+              "value": "={{ $json.Accion }}"
+            },
+            {
+              "name": "mensaje",
+              "value": "={{ 'Reponer ' + $json.producto + ': faltan ' + $json.faltante + ' unidades (prioridad ' + $json.prioridad + ')' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        760,
+        88
+      ],
+      "id": "cc350445-2cbd-41e6-9383-cc7583ce628d",
+      "name": "Registrar alerta en Supabase",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "cJhpFzlFaDakVsaY",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "107e1060-3ab5-484e-8fc3-8e4515097658",
+              "name": "Estado",
+              "value": "={{ $json.estado_stock }}",
+              "type": "string"
+            },
+            {
+              "id": "a40c8d57-9d09-42ba-af5b-1a49119e4d38",
+              "name": "Accion",
+              "value": "={{ $json.accion }}",
+              "type": "string"
+            },
+            {
+              "id": "ac8face8-b465-4a66-a37d-d21bfe6d45ef",
+              "name": "alerta_registrada",
+              "value": "={{ $json.alerta_id !== undefined }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        960,
+        88
+      ],
+      "id": "14e6a9ab-0963-452e-96ae-1e42b6f97471",
+      "name": "Confirmar registro"
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "query": {
+            "producto": "Peluche Stitch"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No requiere reposición",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Prioridad alta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prioridad media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transformar y calcular": {
+      "main": [
+        [
+          {
+            "node": "Asignar prioridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asignar prioridad": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "¿Encontró producto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prioridad alta": {
+      "main": [
+        [
+          {
+            "node": "Registrar alerta en Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prioridad media": {
+      "main": [
+        [
+          {
+            "node": "Registrar alerta en Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No requiere reposición": {
+      "main": [
+        [
+          {
+            "node": "Unir resultados",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Unir resultados": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Encontró producto?": {
+      "main": [
+        [
+          {
+            "node": "Preparar producto (subworkflow)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Producto no encontrado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Producto no encontrado": {
+      "main": [
+        [
+          {
+            "node": "Unir resultados",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Preparar producto (subworkflow)": {
+      "main": [
+        [
+          {
+            "node": "¿Datos válidos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Datos válidos?": {
+      "main": [
+        [
+          {
+            "node": "Transformar y calcular",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Datos no válidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datos no válidos": {
+      "main": [
+        [
+          {
+            "node": "Unir resultados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Registrar alerta en Supabase": {
+      "main": [
+        [
+          {
+            "node": "Confirmar registro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar registro": {
+      "main": [
+        [
+          {
+            "node": "Unir resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "id": "IQ0wI2qda3npLwqI",
+  "tags": []
+}
